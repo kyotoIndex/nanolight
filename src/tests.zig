@@ -7,6 +7,7 @@ const Index = @import("apps.zig").Index;
 const view = @import("view.zig");
 
 test {
+    @import("locale.zig").override = false;
     _ = @import("search.zig");
     _ = @import("calc.zig");
     _ = @import("results.zig");

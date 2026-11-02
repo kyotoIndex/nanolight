@@ -26,7 +26,8 @@ pub const roots = [_][]const u8{
 };
 
 /// Shown with an empty query before anything was opened.
-const starters = [_][]const u8{ "Safari", "Notes", "Calendar", "System Settings", "Finder" };
+const starters_en = [_][]const u8{ "Safari", "Notes", "Calendar", "System Settings", "Finder" };
+const starters_zh = [_][]const u8{ "Safari", "备忘录", "日历", "系统设置", "访达" };
 
 pub const Icon = struct { png: []u8 };
 
@@ -145,6 +146,7 @@ pub const Index = struct {
             };
             best = next;
         }
+        const starters = if (@import("locale.zig").chinese()) &starters_zh else &starters_en;
         for (starters) |s| {
             if (n == out.len) break;
             const i = ix.find(s) orelse continue;

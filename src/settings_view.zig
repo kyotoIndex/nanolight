@@ -10,6 +10,7 @@ const panel = @import("view.zig");
 const shortcut = @import("shortcut.zig");
 const account = @import("account.zig");
 const SettingsHost = @import("settings_host.zig").SettingsHost;
+const strings = @import("strings.zig");
 const Choice = shortcut.Choice;
 const Palette = panel.Palette;
 
@@ -77,24 +78,24 @@ pub const Settings = struct {
         const badge = ui.div(c).size(28, 28).rounded(8).center().bg(p.tile);
         ui.icon(c, "gearshape", .{ .size = 15, .weight = .medium, .color = p.text });
         badge.end();
-        ui.text(c, "Settings", .{ .size = 18, .weight = .semibold, .color = p.text, .tracking = -0.2 });
+        ui.text(c, strings.settingsTitle(), .{ .size = 18, .weight = .semibold, .color = p.text, .tracking = -0.2 });
     }
 
     fn body(s: *Settings, c: *ui.Context, n: *panel.Nanolight, p: Palette, rows: []const RowKind) void {
         const col = ui.div(c).column().wFull().px(20).pt(2).pb(6).gap(10).grow();
         defer col.end();
-        label(c, p, "Open Nanolight with");
+        label(c, p, strings.settingsOpenWith());
         s.choices(c, n, p);
-        label(c, p, "Search");
-        s.switchRow(c, n, p, rows, .suggest, "Google Suggestions");
-        label(c, p, "This Mac");
-        s.switchRow(c, n, p, rows, .login, "Open at Login");
-        label(c, p, "Sync Across Macs");
+        label(c, p, strings.settingsSearchSection());
+        s.switchRow(c, n, p, rows, .suggest, strings.settingsGoogleSuggest());
+        label(c, p, strings.settingsThisMac());
+        s.switchRow(c, n, p, rows, .login, strings.settingsLogin());
+        label(c, p, strings.settingsSyncSection());
         s.sync(c, n, p, rows);
-        label(c, p, "Updates");
+        label(c, p, strings.settingsUpdates());
         s.updates(c, n, p, rows);
-        s.button(c, n, p, rows, .welcome, "Show Welcome Again");
-        s.button(c, n, p, rows, .quit, "Quit Nanolight");
+        s.button(c, n, p, rows, .welcome, strings.settingsWelcomeAgain());
+        s.button(c, n, p, rows, .quit, strings.settingsQuit());
     }
 
     fn label(c: *ui.Context, p: Palette, name: []const u8) void {
@@ -215,7 +216,7 @@ pub const Settings = struct {
         ui.div(c).wFull().h(1).bg(p.hair).end();
         const bar = ui.div(c).row().wFull().h(panel.footer_h).px(16).gap(8).itemsCenter();
         defer bar.end();
-        ui.text(c, "Back", .{ .size = 12, .color = p.sub.alpha(0.8) });
+        ui.text(c, strings.settingsBack(), .{ .size = 12, .color = p.sub.alpha(0.8) });
         ui.kbd(c, "esc");
     }
 

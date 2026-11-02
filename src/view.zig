@@ -9,6 +9,7 @@ const motion = ui.motion;
 const Index = @import("apps.zig").Index;
 const results = @import("results.zig");
 const suggest = @import("suggest.zig");
+const strings = @import("strings.zig");
 const text = @import("text.zig");
 const settings_view = @import("settings_view.zig");
 const SettingsHost = @import("settings_host.zig").SettingsHost;
@@ -272,7 +273,7 @@ pub const Nanolight = struct {
             .bare = true,
             .size = 21,
             .width = .fill,
-            .placeholder = "Search apps, do math, ask Grok…",
+            .placeholder = strings.searchPlaceholder(),
             .placeholder_color = p.sub.alpha(0.75),
             .color = p.text,
         });
@@ -419,8 +420,8 @@ pub const Nanolight = struct {
                 ui.text(c, a.folder, .{ .size = 12, .color = p.sub.alpha(0.8) });
             },
             .settings => {
-                ui.text(c, "Nanolight Settings", .{ .size = 13.5, .weight = .medium, .color = p.text });
-                ui.text(c, "Shortcut, sync, updates", .{ .size = 12, .color = p.sub.alpha(0.8) });
+                ui.text(c, strings.nanolightSettingsTitle(), .{ .size = 13.5, .weight = .medium, .color = p.text });
+                ui.text(c, strings.nanolightSettingsSub(), .{ .size = 12, .color = p.sub.alpha(0.8) });
             },
             .suggest => {
                 const w = s.web.get(r.web);
@@ -428,9 +429,9 @@ pub const Nanolight = struct {
             },
             .ask_grok, .search_x, .search_web => {
                 const verb = switch (r.kind) {
-                    .ask_grok => "Ask Grok",
-                    .search_x => "Search X for",
-                    else => "Search Google for",
+                    .ask_grok => strings.askGrokFor(),
+                    .search_x => strings.searchXFor(),
+                    else => strings.searchGoogleFor(),
                 };
                 ui.textf(c, .{ .size = 13.5, .weight = .medium, .color = p.text, .truncate = .ellipsis }, "{s} “{s}”", .{ verb, std.mem.trim(u8, q, " ") });
                 ui.text(c, switch (r.kind) {
@@ -442,7 +443,7 @@ pub const Nanolight = struct {
         }
         ui.spacer(c);
         if (i == s.sel) {
-            ui.text(c, if (r.kind == .app or r.kind == .settings) "Open" else "Go", .{ .size = 12, .weight = .medium, .color = p.sub });
+            ui.text(c, if (r.kind == .app or r.kind == .settings) strings.openLabel() else strings.goLabel(), .{ .size = 12, .weight = .medium, .color = p.sub });
             ui.kbd(c, "↩");
         } else if (i < 9) ui.textf(c, .{ .size = 12, .weight = .medium, .color = p.sub.alpha(0.5), .tabular = true }, "⌘{d}", .{i + 1});
     }
@@ -506,7 +507,7 @@ pub const Nanolight = struct {
         const bar = ui.div(c).row().wFull().h(footer_h).px(16).gap(8).itemsCenter();
         defer bar.end();
         appIcon(c, 16);
-        ui.textf(c, .{ .size = 12, .weight = .medium, .color = p.sub.alpha(0.8) }, "{s} · {d} apps", .{ if (s.note.len > 0) s.note else "Nanolight", s.index.apps.items.len });
+        ui.textf(c, .{ .size = 12, .weight = .medium, .color = p.sub.alpha(0.8) }, "{s} · {d}{s}", .{ if (s.note.len > 0) s.note else "Nanolight", s.index.apps.items.len, strings.footerAppsSuffix() });
         ui.spacer(c);
         {
             ui.key(c, "settings-gear");
@@ -514,10 +515,10 @@ pub const Nanolight = struct {
             defer g.end();
             if (g.clicked()) s.openSettings();
             ui.icon(c, "gearshape", .{ .size = 13, .weight = .medium, .color = p.sub });
-            ui.text(c, "Settings", .{ .size = 1, .color = p.sub.alpha(0) });
+            ui.text(c, strings.settingsTitle(), .{ .size = 1, .color = p.sub.alpha(0) });
         }
         if (s.previewing) {
-            ui.text(c, "Open in Browser", .{ .size = 12, .weight = .medium, .color = p.text.alpha(0.85) });
+            ui.text(c, strings.openInBrowser(), .{ .size = 12, .weight = .medium, .color = p.text.alpha(0.85) });
             ui.kbd(c, "⌘↩");
             ui.div(c).w(1).h(14).bg(p.hair).end();
             ui.text(c, "Back", .{ .size = 12, .color = p.sub.alpha(0.8) });

@@ -9,6 +9,8 @@ const std = @import("std");
 const search = @import("search.zig");
 const calc = @import("calc.zig");
 const Index = @import("apps.zig").Index;
+const strings = @import("strings.zig");
+const locale = @import("locale.zig");
 
 pub const Kind = enum {
     calc,
@@ -24,32 +26,32 @@ pub const Kind = enum {
     /// The row's kind as its trailing label shows it.
     pub fn label(k: Kind) []const u8 {
         return switch (k) {
-            .calc => "Calculator",
-            .app => "Application",
-            .settings => "Nanolight",
-            .ask_grok, .search_x, .search_web, .suggest => "Web",
+            .calc => strings.rowCalc(),
+            .app => strings.rowApplication(),
+            .settings => strings.sectionNanolight(),
+            .ask_grok, .search_x, .search_web, .suggest => strings.rowWeb(),
         };
     }
 
     /// What Return does to it.
     pub fn action(k: Kind) []const u8 {
         return switch (k) {
-            .calc => "Copy Answer",
-            .app => "Open Application",
-            .settings => "Open Settings",
-            .ask_grok => "Ask Grok",
-            .search_x => "Search X",
-            .search_web, .suggest => "Search Google",
+            .calc => strings.actionCopyAnswer(),
+            .app => strings.actionOpenApp(),
+            .settings => strings.actionOpenSettings(),
+            .ask_grok => strings.actionAskGrok(),
+            .search_x => strings.actionSearchX(),
+            .search_web, .suggest => strings.actionSearchGoogle(),
         };
     }
 
     fn section(k: Kind, suggested: bool) []const u8 {
         return switch (k) {
-            .calc => "Calculator",
-            .app => if (suggested) "Suggestions" else "Applications",
-            .settings => "Nanolight",
-            .search_web, .suggest => "Google",
-            .ask_grok, .search_x => "Ask & Search",
+            .calc => strings.sectionCalc(),
+            .app => strings.sectionApps(suggested),
+            .settings => strings.sectionNanolight(),
+            .search_web, .suggest => strings.sectionGoogle(),
+            .ask_grok, .search_x => strings.sectionAskSearch(),
         };
     }
 };
@@ -127,6 +129,7 @@ pub const Results = struct {
     /// "settings" and "preferences", the words people type for this.
     fn isSettings(query: []const u8) bool {
         if (std.ascii.eqlIgnoreCase(query, "settings") or std.ascii.eqlIgnoreCase(query, "preferences")) return true;
+        if (!locale.chinese()) return false;
         const keys = [_][]const u8{ "设置", "偏好设置", "系统设置", "nanolight 设置" };
         const q = std.mem.trim(u8, query, " ");
         for (keys) |k| if (std.mem.eql(u8, q, k)) return true;
@@ -185,6 +188,7 @@ fn testIndex(a: std.mem.Allocator, names: []const []const u8) !Index {
 
 test "math first, then apps; ask and search only without an answer" {
     const t = std.testing;
+    locale.override = false;
     var ix = try testIndex(t.allocator, &.{ "Safari", "System Settings", "Calculator" });
     defer ix.deinit();
     var r: Results = .{};
