@@ -369,6 +369,7 @@ pub const Live = struct {
         l.s.reveal();
         w.show();
         panel.shown(w);
+        w.focus();
         l.through.start();
         if (l.acct) |*a| a.maybePull();
         w.redraw();

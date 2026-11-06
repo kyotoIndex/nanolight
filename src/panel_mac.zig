@@ -33,6 +33,7 @@ pub fn setup(app: *nanoui.App, w: *nanoui.Window, s: *view.Nanolight, h: f32) vo
     objc.msg(void, w.nswindow, "setHasShadow:", .{objc.NO});
     glass = backdrop(w, s.theme.radius(), h);
     if (w.surface) |surface| surface.after_frame = afterFrame;
+    configureImePanel(w);
 }
 
 /// The glass's corners to the theme's, as the panel's follow it.
@@ -132,7 +133,24 @@ pub fn focused(w: *nanoui.Window) bool {
 /// is the system's, at full strength at once), so the window has it; the
 /// fade also hides the frame left from the last showing while the panel
 /// draws its new one.
+/// Popover panels default to non-activating / popup level; Chinese IMK often
+/// won't show the candidate window without this (see merged #6 review).
+pub fn configureImePanel(w: *nanoui.Window) void {
+    const nw = w.nswindow;
+    const pool = objc.Pool.push();
+    defer pool.pop();
+    const mask = objc.msg(objc.NSUInteger, nw, "styleMask", .{});
+    const nonactivating: objc.NSUInteger = 1 << 7;
+    if (mask & nonactivating != 0) objc.msg(void, nw, "setStyleMask:", .{mask & ~nonactivating});
+    if (objc.msg(objc.BOOL, nw, "isKindOfClass:", .{objc.class("NSPanel")})) {
+        objc.msg(void, nw, "setFloatingPanel:", .{objc.NO});
+        objc.msg(void, nw, "setBecomesKeyOnlyIfNeeded:", .{objc.NO});
+    }
+    objc.msg(void, nw, "setLevel:", .{@as(objc.NSInteger, 3)});
+}
+
 pub fn shown(w: *nanoui.Window) void {
+    configureImePanel(w);
     const pool = objc.Pool.push();
     defer pool.pop();
     const cls = objc.class("NSAnimationContext");
